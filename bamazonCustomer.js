@@ -40,9 +40,23 @@ function purchase() {
             }
         ]).then(function (answ) {
             if (answ.qty > res[answ.item_id - 1].stock_quantity) {
-                console.log('Insufficient quantity. Only ' + (res[answ.item_id - 1].stock_quantity) + 'in stock.');
+                console.log('\nInsufficient quantity. Only ' + (res[answ.item_id - 1].stock_quantity) + ' remain in stock.\n');
+                conn.end();
             } else {
-                // conn.query('UP')
+                conn.query('UPDATE PRODUCTS SET ? WHERE ?',
+                    [{
+                        stock_quantity: ((res[answ.item_id - 1].stock_quantity) - answ.qty)
+                    },
+                    {
+                        item_id: answ.item_id
+                    }
+                    ], function (err, res) {
+                        if (err) throw err;
+                        console.log(res);
+                        // console.log('Purchase completed.\n Your total purchse price: $' + (answ.qty * (res[answ.item_id - 1].price)));
+                        total(answ.qty, answ.item_id);
+                    }
+                );
             }
             // console.log(res[answ.item_id - 1].stock_quantity);
             // console.log('ID: ' + res[0].item_id);
@@ -51,7 +65,15 @@ function purchase() {
             // console.log('Stock: ' + res[0].stock_quantity);
             // console.log('ID: ' + answ.item_id);
             // console.log('QTY: ' + answ.qty);
-            conn.end();
         })
+    });
+}  // End of purchase function
+
+function total(qty, id) {
+    conn.query('SELECT * FROM products', function (err, res) {
+        if (err) throw err;
+        console.table(res);
+        console.log('\nPurchase completed.\nYour total purchse price: $' + (qty * (res[id - 1].price) + '\n').toFixed(2));
+        conn.end();
     });
 }

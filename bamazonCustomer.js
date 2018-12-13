@@ -45,7 +45,7 @@ function purchase() {
             } else {
                 conn.query('UPDATE PRODUCTS SET ? WHERE ?',
                     [{
-                        stock_quantity: ((res[answ.item_id - 1].stock_quantity) - answ.qty)
+                        stock_quantity: (parseInt((res[answ.item_id - 1].stock_quantity))) + (parseInt(answ.qty))
                     },
                     {
                         item_id: answ.item_id

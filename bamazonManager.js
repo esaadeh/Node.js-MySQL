@@ -40,13 +40,13 @@ function start() {
                 addInventory();
                 break;
 
-            case ('Add new Product'):
+            case ('Add New Product'):
                 // console.log('addInventory');
                 addNewProduct();
                 break;
 
             default:
-                console.log('Logout & connection terminated.');
+                console.log('connection terminated.');
                 conn.end();
         }
     });
@@ -56,17 +56,17 @@ function start() {
 function forSale() {
     conn.query('SELECT* FROM products', function (err, res) {
         if (err) throw err;
-        console.table('\n' + res + '\n');
+        console.log('\n');
+        console.table(res);
         conn.end();
     });
 }
 
 function lowInventory() {
-    conn.query('SELECT * FROM products WHERE stock_quantity < 5', function (err, res) {
+    conn.query('SELECT * FROM products WHERE stock_quantity < 50', function (err, res) {
         if (err) throw err;
         console.log('\n');
         console.table(res);
-        console.log('\n');
         if (res === ' ') {
             console.log('No products at low inventory levels.');
         }
@@ -92,7 +92,7 @@ function addInventory() {
                 message: 'How many units would you like to purchase?'
             }
         ]).then(function (answ) {
-            conn.query('UPDATE PRODUCTS SET ? WHERE ?',
+            conn.query('UPDATE products SET ? WHERE ?',
                 [{
                     stock_quantity: (parseInt((res[answ.item_id - 1].stock_quantity))) + (parseInt(answ.qty))
                 },
@@ -101,8 +101,54 @@ function addInventory() {
                 }
                 ], function (err, res) {
                     if (err) throw err;
-                    console.log('Update');
-                    conn.end();
+                    console.log('Inventory Added.');
+                    forSale();
+                }
+            );
+        })
+    });
+}
+
+
+function addNewProduct() {
+    conn.query('SELECT* FROM products', function (err, res) {
+        if (err) throw err;
+        console.table(res);
+
+        inquirer.prompt([
+            {
+                type: 'input',
+                name: 'name',
+                message: 'What is the name of the product you\'d like to add?'
+            },
+            {
+                type: 'input',
+                name: 'dept',
+                message: 'What department name would you like it to be listed under?'
+            },
+            {
+                type: 'input',
+                name: 'price',
+                message: 'What would you like to set the list price as?'
+            },
+            {
+                type: 'input',
+                name: 'qty',
+                message: 'How many units would you like to stock?'
+            }
+
+        ]).then(function (answ) {
+            conn.query('INSERT INTO products SET ?',
+                [{
+                    product_name: answ.name,
+                    department_name: answ.dept,
+                    price: answ.price,
+                    stock_quantity: answ.qty
+                }
+                ], function (err, res) {
+                    if (err) throw err;
+                    console.log('New Item Added.');
+                    forSale();
                 }
             );
         })

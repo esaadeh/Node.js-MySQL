@@ -45,7 +45,7 @@ function purchase() {
             } else {
                 conn.query('UPDATE PRODUCTS SET ? WHERE ?',
                     [{
-                        stock_quantity: (parseInt((res[answ.item_id - 1].stock_quantity))) + (parseInt(answ.qty))
+                        stock_quantity: ((res[answ.item_id - 1].stock_quantity) - answ.qty)
                     },
                     {
                         item_id: answ.item_id
@@ -73,7 +73,7 @@ function total(qty, id) {
     conn.query('SELECT * FROM products', function (err, res) {
         if (err) throw err;
         console.table(res);
-        console.log('\nPurchase completed.\nYour total purchse price: $' + (qty * (res[id - 1].price) + '\n').toFixed(2));
+        console.log('\nPurchase completed.\nYour total purchse price: $' + (qty * (res[id - 1].price)).toFixed(2) + '\n');
         conn.end();
     });
 }

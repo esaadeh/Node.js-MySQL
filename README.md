@@ -34,7 +34,7 @@ If there is enough product on hand, the customer's order is fulfilled and the SQ
 
 #2: Manager View (bamazonManager)
 Link to video of bamazonManager:
-https://drive.google.com/file/d/1gLj1QilSy38heDvupVRFi7CwsccDCof4/view
+https://drive.google.com/file/d/1g9EbGHgazk_AvKsIDq4CG-fE0YU7Q8HX/view
 
 Using the same bamazon database, the following list of menu option appear at the start of the app:
 
@@ -42,6 +42,7 @@ Using the same bamazon database, the following list of menu option appear at the
 - View Low Inventory
 - Add to Inventory
 - Add New Product
+- Quit
 
 
 If View Products for Sale is selected, the app will list every available item: the item IDs, names, prices, and quantities.

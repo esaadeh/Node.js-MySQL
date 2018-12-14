@@ -24,7 +24,7 @@ function start() {
             type: 'list',
             name: 'choices',
             message: 'Which of the following actions would you like to perfom?',
-            choices: ['View Products for Sale', 'View Low Inventory', 'Add to Inventory', 'Add New Product']
+            choices: ['View Products for Sale', 'View Low Inventory', 'Add to Inventory', 'Add New Product', 'Quit']
         }
     ]).then(function (mngr) {
         switch (mngr.choices) {
@@ -57,11 +57,11 @@ function forSale() {
         if (err) throw err;
         console.log('\n');
         console.table(res);
-        conn.end();
+        start();
     });
 }
 
-// Querys the db and diplays all product data on item with less then 5 units in stock. If none, will log such
+// Querys the db and diplays all product data on items with less then 5 units in stock. If none, will log such
 function lowInventory() {
     conn.query('SELECT * FROM products WHERE stock_quantity < 5', function (err, res) {
         if (err) throw err;
@@ -72,7 +72,7 @@ function lowInventory() {
         } else { 
         console.log('\n');
         console.table(res);
-        conn.end();
+        start();
         }
     });
 }
@@ -92,7 +92,7 @@ function addInventory() {
             {
                 type: 'input',
                 name: 'qty',
-                message: 'How many units would you like to purchase?'
+                message: 'How many units would you like to stock?'
             } // The two data points from above are used to update the db and forSale is called to show all items again
         ]).then(function (answ) {
             conn.query('UPDATE products SET ? WHERE ?',

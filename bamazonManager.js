@@ -1,20 +1,23 @@
+// Packages required for the app
 var mysql = require('mysql');
 var inquirer = require('inquirer');
 var cTable = require('console.table');
 
+// Connection variable with all the requisite settings
 var conn = mysql.createConnection({
     host: 'localhost',
     user: 'root',
     password: 'password',
     database: 'bamazon_DB'
 });
-
+// Initial connection to the database that will log a connection ID for verification and then call the start function to start the functionality
 conn.connect(function (err) {
     if (err) throw err;
     console.log('connected as id ' + conn.threadId);
     start();
 });
 
+// The start function prompts the user via inquirer for their chosen action and then calls the requisite function
 function start() {
     inquirer.prompt([
         {
@@ -26,22 +29,18 @@ function start() {
     ]).then(function (mngr) {
         switch (mngr.choices) {
             case ('View Products for Sale'):
-                // console.log('forSale');
                 forSale();
                 break;
 
             case ('View Low Inventory'):
-                // console.log('lowInventory');
                 lowInventory();
                 break;
 
             case ('Add to Inventory'):
-                // console.log('addInventory');
                 addInventory();
                 break;
 
             case ('Add New Product'):
-                // console.log('addInventory');
                 addNewProduct();
                 break;
 
@@ -52,7 +51,7 @@ function start() {
     });
 }
 
-
+// Querys the database and diplays all products for sale and all column data on them
 function forSale() {
     conn.query('SELECT* FROM products', function (err, res) {
         if (err) throw err;
@@ -62,19 +61,23 @@ function forSale() {
     });
 }
 
+// Querys the db and diplays all product data on item with less then 5 units in stock. If none, will log such
 function lowInventory() {
-    conn.query('SELECT * FROM products WHERE stock_quantity < 50', function (err, res) {
+    conn.query('SELECT * FROM products WHERE stock_quantity < 5', function (err, res) {
         if (err) throw err;
+
+        if (!res.length) {
+            console.log('\nNo products at low inventory levels.\n');
+            conn.end();
+        } else { 
         console.log('\n');
         console.table(res);
-        if (res === ' ') {
-            console.log('No products at low inventory levels.');
-        }
         conn.end();
+        }
     });
 }
 
-
+// Querys the db and returns all items in stock and then prompts the user via inquirer what item they'd like to stock and how many.
 function addInventory() {
     conn.query('SELECT* FROM products', function (err, res) {
         if (err) throw err;
@@ -90,7 +93,7 @@ function addInventory() {
                 type: 'input',
                 name: 'qty',
                 message: 'How many units would you like to purchase?'
-            }
+            } // The two data points from above are used to update the db and forSale is called to show all items again
         ]).then(function (answ) {
             conn.query('UPDATE products SET ? WHERE ?',
                 [{
@@ -109,7 +112,7 @@ function addInventory() {
     });
 }
 
-
+// The user is prompted via inquirer fot the name, department, price and quantity of the new item they'd like to stock and .then the database is updated as such
 function addNewProduct() {
     conn.query('SELECT* FROM products', function (err, res) {
         if (err) throw err;

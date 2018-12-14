@@ -1,7 +1,9 @@
+// Packages required for this app
 var mysql = require('mysql');
 var inquirer = require('inquirer');
 var cTable = require('console.table');
 
+// Connection variable with all the requisite settings
 var conn = mysql.createConnection({
     host: 'localhost',
     user: 'root',
@@ -9,12 +11,14 @@ var conn = mysql.createConnection({
     database: 'bamazon_DB'
 });
 
+// Initial connection to the database that will log a connection ID for verification and then call the forSale function to start the functionality
 conn.connect(function (err) {
     if (err) throw err;
     console.log('connected as id ' + conn.threadId);
     forSale();
 });
 
+// For sale function query's the database for all available product IDs, names and prices and displays them in a table, it then calls the purchase function
 function forSale() {
     conn.query('SELECT item_id, product_name, price FROM products', function (err, res) {
         if (err) throw err;
@@ -23,10 +27,10 @@ function forSale() {
     });
 }
 
+// The purchase function prompts the user via inquirer for their chosen product_id and quantity to purchase 
 function purchase() {
     conn.query('SELECT * FROM products', function (err, res) {
         if (err) throw err;
-        console.table(res);
         inquirer.prompt([
             {
                 type: 'input',
@@ -37,12 +41,12 @@ function purchase() {
                 type: 'input',
                 name: 'qty',
                 message: 'How many units would you like to purchase?'
-            }
+            } //if their is not enough in stock to fulfill the order, the user is prompted as such and the order is not place.          
         ]).then(function (answ) {
             if (answ.qty > res[answ.item_id - 1].stock_quantity) {
                 console.log('\nInsufficient quantity. Only ' + (res[answ.item_id - 1].stock_quantity) + ' remain in stock.\n');
                 conn.end();
-            } else {
+            } else { // If there is enough on hand, the database is queried to remove the product/quantity 
                 conn.query('UPDATE PRODUCTS SET ? WHERE ?',
                     [{
                         stock_quantity: ((res[answ.item_id - 1].stock_quantity) - answ.qty)
@@ -52,27 +56,20 @@ function purchase() {
                     }
                     ], function (err, res) {
                         if (err) throw err;
-                        console.log(res);
-                        // console.log('Purchase completed.\n Your total purchse price: $' + (answ.qty * (res[answ.item_id - 1].price)));
+// The total function is then called and passed the quantity and product_id
                         total(answ.qty, answ.item_id);
                     }
                 );
             }
-            // console.log(res[answ.item_id - 1].stock_quantity);
-            // console.log('ID: ' + res[0].item_id);
-            // console.log('Name: ' + res[0].product_name);
-            // console.log('Price: ' + res[0].price);
-            // console.log('Stock: ' + res[0].stock_quantity);
-            // console.log('ID: ' + answ.item_id);
-            // console.log('QTY: ' + answ.qty);
+         
         })
     });
-}  // End of purchase function
+}
 
+// The total of the purchse is calculated and displayed.
 function total(qty, id) {
     conn.query('SELECT * FROM products', function (err, res) {
         if (err) throw err;
-        console.table(res);
         console.log('\nPurchase completed.\nYour total purchse price: $' + (qty * (res[id - 1].price)).toFixed(2) + '\n');
         conn.end();
     });
